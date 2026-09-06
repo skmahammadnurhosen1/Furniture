@@ -1,0 +1,6 @@
+{
+  "name": "Furni - Modern Minimalist Furniture",
+  "description": "A minimalistic modern e-commerce furniture store featuring curated living room, bedroom, dining, office, and outdoor pieces crafted for comfort and style.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
