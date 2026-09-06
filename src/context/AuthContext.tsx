@@ -7,6 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile as updateAuthProfile,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, handleFirestoreError, OperationType } from '../lib/firebase';
@@ -19,6 +20,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, pass: string) => Promise<void>;
   signUpWithEmail: (email: string, pass: string, name?: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfileData: (data: Partial<UserProfile>) => Promise<void>;
   uploadProfilePhotoFromBase64: (base64String: string) => Promise<void>;
@@ -35,33 +37,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch or initialize user profile document in Firestore
   const fetchUserProfile = async (currentUser: User) => {
     const userDocRef = doc(db, 'users', currentUser.uid);
-    let docSnap;
     try {
-      docSnap = await getDoc(userDocRef);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap && docSnap.exists()) {
+        const data = docSnap.data() as UserProfile;
+        setProfile(data);
+        return;
+      }
     } catch (err) {
-      handleFirestoreError(err, OperationType.GET, `users/${currentUser.uid}`);
-      return;
+      console.warn('Could not read user profile from Firestore, creating baseline:', err);
     }
 
-    if (docSnap && docSnap.exists()) {
-      const data = docSnap.data() as UserProfile;
-      setProfile(data);
-    } else {
-      // Create initial minimal profile without asking for address or extra info upfront
-      const initialProfile: UserProfile = {
-        userId: currentUser.uid,
-        email: currentUser.email || '',
-        displayName: currentUser.displayName || '',
-        photoBase64: currentUser.photoURL || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      try {
-        await setDoc(userDocRef, initialProfile);
-        setProfile(initialProfile);
-      } catch (createErr) {
-        handleFirestoreError(createErr, OperationType.CREATE, `users/${currentUser.uid}`);
-      }
+    // Create initial minimal profile without asking for address or extra info upfront
+    const initialProfile: UserProfile = {
+      userId: currentUser.uid,
+      email: currentUser.email || '',
+      displayName: currentUser.displayName || '',
+      photoBase64: currentUser.photoURL || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await setDoc(userDocRef, initialProfile);
+      setProfile(initialProfile);
+    } catch (createErr) {
+      console.warn('Could not write user profile to Firestore:', createErr);
+      setProfile(initialProfile);
     }
   };
 
@@ -123,11 +125,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        await setDoc(userDocRef, newProfile);
+        try {
+          await setDoc(userDocRef, newProfile);
+        } catch (e) {
+          console.warn('Error setting user profile on signup:', e);
+        }
         setProfile(newProfile);
       }
     } catch (error: any) {
       console.error('Email Sign Up Error:', error);
+      throw error;
+    }
+  };
+
+  const sendPasswordReset = async (emailAddress: string) => {
+    try {
+      await sendPasswordResetEmail(auth, emailAddress);
+    } catch (error: any) {
+      console.error('Password reset error:', error);
       throw error;
     }
   };
@@ -178,6 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithGoogle,
         signInWithEmail,
         signUpWithEmail,
+        sendPasswordReset,
         logout,
         updateProfileData,
         uploadProfilePhotoFromBase64,
