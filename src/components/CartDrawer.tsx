@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Check } from 'lucide-react';
-import { CartItem } from '../types';
+import { CartItem, Product } from '../types';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -9,6 +9,8 @@ interface CartDrawerProps {
   onUpdateQuantity: (productId: string, delta: number) => void;
   onRemoveItem: (productId: string) => void;
   onClearCart: () => void;
+  onStartCheckout?: (total: number) => void;
+  onSelectProduct?: (product: Product) => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -18,6 +20,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
+  onStartCheckout,
+  onSelectProduct,
 }) => {
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -49,6 +53,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   };
 
   const handleCheckout = () => {
+    if (onStartCheckout) {
+      onStartCheckout(total);
+      return;
+    }
     setIsCheckingOut(true);
     setTimeout(() => {
       setIsCheckingOut(false);
@@ -146,12 +154,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     src={item.product.image}
                     alt={item.product.name}
                     referrerPolicy="no-referrer"
-                    className="w-20 h-20 rounded-lg object-cover bg-stone-100 shrink-0"
+                    onClick={() => {
+                      if (onSelectProduct) {
+                        onSelectProduct(item.product);
+                        onClose();
+                      }
+                    }}
+                    className="w-20 h-20 rounded-lg object-cover bg-stone-100 shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                   />
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-bold text-stone-900 truncate">
+                        <h4
+                          onClick={() => {
+                            if (onSelectProduct) {
+                              onSelectProduct(item.product);
+                              onClose();
+                            }
+                          }}
+                          className="text-sm font-bold text-stone-900 truncate hover:text-[#C08251] cursor-pointer transition-colors"
+                        >
                           {item.product.name}
                         </h4>
                         <button

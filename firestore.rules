@@ -1,0 +1,120 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Security Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Master Admin or Approved Admin check
+    function isMasterAdmin() {
+      return isSignedIn() && request.auth.token.email == 'skmahammadnurhosen1@gmail.com';
+    }
+
+    // Health / connection test rule
+    match /test/{testId} {
+      allow get: if true;
+    }
+
+    // User Profile Validation Helper
+    function isValidUser(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             (!('displayName' in data) || data.displayName == null || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+             (!('photoBase64' in data) || data.photoBase64 == null || (data.photoBase64 is string && data.photoBase64.size() <= 1500000)) &&
+             (!('street' in data) || data.street == null || (data.street is string && data.street.size() <= 200)) &&
+             (!('apartment' in data) || data.apartment == null || (data.apartment is string && data.apartment.size() <= 100)) &&
+             (!('city' in data) || data.city == null || (data.city is string && data.city.size() <= 100)) &&
+             (!('state' in data) || data.state == null || (data.state is string && data.state.size() <= 100)) &&
+             (!('postalCode' in data) || data.postalCode == null || (data.postalCode is string && data.postalCode.size() <= 20)) &&
+             (!('country' in data) || data.country == null || (data.country is string && data.country.size() <= 100)) &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is string && data.createdAt.size() <= 50)) &&
+             (!('updatedAt' in data) || data.updatedAt == null || (data.updatedAt is string && data.updatedAt.size() <= 50));
+    }
+
+    // Order Validation Helper
+    function isValidOrder(data) {
+      return data.id is string && data.id.size() <= 64 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             (!('userEmail' in data) || data.userEmail == null || (data.userEmail is string && data.userEmail.size() <= 256)) &&
+             data.totalAmount is number && data.totalAmount >= 0 &&
+             data.status is string && data.status.size() <= 30 &&
+             data.shippingAddress is map &&
+             data.items is list && data.items.size() > 0 && data.items.size() <= 100 &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is string && data.createdAt.size() <= 50));
+    }
+
+    // Product Validation Helper
+    function isValidProduct(data) {
+      return data.id is string && data.id.size() <= 64 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 150 &&
+             data.category is string && data.category.size() <= 60 &&
+             data.price is number && data.price >= 0 &&
+             data.image is string && data.image.size() <= 2000000;
+    }
+
+    // User Profile Collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false;
+      allow create: if isSignedIn() && isValidId(userId) && request.auth.uid == userId &&
+                      isValidUser(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isSignedIn() && isValidId(userId) && request.auth.uid == userId &&
+                      isValidUser(incoming()) && incoming().userId == existing().userId &&
+                      (!('createdAt' in existing()) || incoming().createdAt == existing().createdAt);
+      allow delete: if false;
+    }
+
+    // Product Catalog Collection (Publicly viewable, editable by administrators)
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(productId) && isValidProduct(incoming());
+      allow delete: if isValidId(productId);
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow get, list: if true;
+      allow create: if isValidId(orderId) && isValidOrder(incoming());
+      allow update, delete: if isSignedIn();
+    }
+
+    // Admin Requests Collection (For team access applications and approval workflow)
+    match /admin_requests/{requestId} {
+      allow get, list: if true;
+      allow create: if isValidId(requestId);
+      allow update, delete: if true;
+    }
+
+    // Dedicated Admin Accounts & Credentials Collection
+    match /admin_accounts/{adminId} {
+      allow get, list, create, update, delete: if true;
+    }
+
+    // Global Store Settings Collection (Publicly readable, modifiable by administrators)
+    match /settings/{settingId} {
+      allow get, list: if true;
+      allow create, update, delete: if isValidId(settingId);
+    }
+
+  }
+}

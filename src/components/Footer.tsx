@@ -7,19 +7,34 @@ import {
   Heart,
   QrCode,
   Smartphone,
+  Shield,
+  MapPin,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { CATEGORIES } from '../data/furnitureData';
+import { StoreSettings } from '../types';
 
 interface FooterProps {
   onScrollToTop: () => void;
   onSelectCategory: (categoryName: string) => void;
   onScrollToSection: (sectionId: string) => void;
+  onNavigateHome?: () => void;
+  onOpenSearch?: () => void;
+  onOpenProfile?: (tab?: 'profile' | 'address' | 'orders') => void;
+  onOpenAdmin?: () => void;
+  storeSettings?: StoreSettings;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onScrollToTop,
   onSelectCategory,
   onScrollToSection,
+  onNavigateHome,
+  onOpenSearch,
+  onOpenProfile,
+  onOpenAdmin,
+  storeSettings,
 }) => {
   return (
     <footer id="main-footer" className="bg-[#111215] text-stone-300 pt-16 pb-10 border-t border-stone-800">
@@ -47,9 +62,30 @@ export const Footer: React.FC<FooterProps> = ({
                 Furni<span className="text-[#C08251]">.</span>
               </span>
             </div>
-            <p className="text-stone-400 text-sm mb-6 leading-relaxed">
+            <p className="text-stone-400 text-sm mb-4 leading-relaxed">
               Furniture for a better tomorrow.
             </p>
+
+            {storeSettings && (
+              <div className="space-y-1.5 text-xs text-stone-400 mb-6">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-[#C08251] shrink-0 mt-0.5" />
+                  <span>{storeSettings.street}, {storeSettings.city} ({storeSettings.postalCode})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-[#C08251] shrink-0" />
+                  <a href={`mailto:${storeSettings.primaryEmail}`} className="hover:text-white transition-colors truncate">
+                    {storeSettings.primaryEmail}
+                  </a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-[#C08251] shrink-0" />
+                  <a href={`tel:${storeSettings.primaryPhone}`} className="hover:text-white transition-colors">
+                    {storeSettings.primaryPhone}
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* Social Icons */}
             <div className="flex items-center gap-3">
@@ -99,7 +135,10 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2.5 text-sm text-stone-400">
               <li>
                 <button
-                  onClick={() => onScrollToSection('hero')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    else onScrollToSection('hero');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Home
@@ -107,7 +146,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('featured-products')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    onScrollToSection('featured-products');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Shop
@@ -115,7 +157,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('categories-section')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    onScrollToSection('categories-section');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Categories
@@ -123,7 +168,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('features-bar')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    onScrollToSection('features-bar');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   About Us
@@ -131,7 +179,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('promotions')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    onScrollToSection('promotions');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Blog
@@ -139,7 +190,10 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('newsletter')}
+                  onClick={() => {
+                    if (onNavigateHome) onNavigateHome();
+                    onScrollToSection('newsletter');
+                  }}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
                   Contact
@@ -177,9 +231,12 @@ export const Footer: React.FC<FooterProps> = ({
             </h4>
             <ul className="space-y-2.5 text-sm text-stone-400">
               <li>
-                <a href="#track-order" className="hover:text-white transition-colors">
+                <button
+                  onClick={() => onOpenProfile?.('orders')}
+                  className="hover:text-white transition-colors cursor-pointer text-left"
+                >
                   Track Order
-                </a>
+                </button>
               </li>
               <li>
                 <a href="#returns" className="hover:text-white transition-colors">
@@ -255,7 +312,19 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
-          <p>© 2026 Furni. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+            <p>© 2026 {storeSettings?.storeName || 'Furni'}. All rights reserved.</p>
+            {onOpenAdmin && (
+              <button
+                id="footer-admin-portal-btn"
+                onClick={onOpenAdmin}
+                className="hover:text-stone-300 transition-colors cursor-pointer flex items-center gap-1 text-stone-500 hover:underline"
+              >
+                <Shield className="w-3.5 h-3.5 text-[#C08251]" />
+                <span>Admin Portal</span>
+              </button>
+            )}
+          </div>
 
           <p className="flex items-center gap-1 text-stone-400">
             <span>Designed with</span>

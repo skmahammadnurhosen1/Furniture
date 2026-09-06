@@ -1,0 +1,349 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with personal and shipping details",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth User UID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User full name",
+          "maxLength": 100
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number",
+          "maxLength": 30
+        },
+        "photoBase64": {
+          "type": "string",
+          "description": "Profile photo in base64 format uploaded from device gallery",
+          "maxLength": 1000000
+        },
+        "street": {
+          "type": "string",
+          "description": "Street address",
+          "maxLength": 200
+        },
+        "apartment": {
+          "type": "string",
+          "description": "Apartment, suite, or unit number",
+          "maxLength": 100
+        },
+        "city": {
+          "type": "string",
+          "description": "City",
+          "maxLength": 100
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province",
+          "maxLength": 100
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal code",
+          "maxLength": 20
+        },
+        "country": {
+          "type": "string",
+          "description": "Country name",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user document was created",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user document was last updated",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "email"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Furniture catalog product item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product identifier",
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "description": "Product display name",
+          "maxLength": 150
+        },
+        "category": {
+          "type": "string",
+          "description": "Product category",
+          "maxLength": 60
+        },
+        "room": {
+          "type": "string",
+          "description": "Associated room",
+          "maxLength": 60
+        },
+        "price": {
+          "type": "number",
+          "description": "Current selling price in USD"
+        },
+        "originalPrice": {
+          "type": "number",
+          "description": "Original retail price in USD"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Average review rating"
+        },
+        "reviewsCount": {
+          "type": "number",
+          "description": "Total review count"
+        },
+        "image": {
+          "type": "string",
+          "description": "Product image URL or gallery uploaded base64 data string",
+          "maxLength": 2000000
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the piece",
+          "maxLength": 3000
+        },
+        "dimensions": {
+          "type": "string",
+          "description": "Physical dimensions",
+          "maxLength": 100
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Whether the product is newly introduced"
+        },
+        "isBestSeller": {
+          "type": "boolean",
+          "description": "Whether the product is a bestseller"
+        },
+        "inStock": {
+          "type": "boolean",
+          "description": "Inventory stock availability"
+        },
+        "materials": {
+          "type": "array",
+          "description": "Materials used in craftsmanship"
+        },
+        "colors": {
+          "type": "array",
+          "description": "Available color variants"
+        }
+      },
+      "required": ["id", "name", "category", "price", "image"]
+    },
+    "AdminRequest": {
+      "title": "AdminRequest",
+      "description": "Access application for administrator privileges",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Request document ID or user UID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "User identifier if authenticated",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "Requester email address",
+          "maxLength": 256
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Requester full name",
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "description": "Requester phone number",
+          "maxLength": 30
+        },
+        "reason": {
+          "type": "string",
+          "description": "Application statement or reason for requesting admin access",
+          "maxLength": 500
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the admin request: pending, approved, or rejected",
+          "maxLength": 30
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the request was submitted",
+          "format": "date-time"
+        },
+        "reviewedBy": {
+          "type": "string",
+          "description": "Email or UID of admin who reviewed this application",
+          "maxLength": 256
+        },
+        "reviewedAt": {
+          "type": "string",
+          "description": "Timestamp when the request was approved or rejected",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "email", "fullName", "status", "createdAt"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Global store contact information and operational details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Settings key identifier",
+          "maxLength": 64
+        },
+        "storeName": {
+          "type": "string",
+          "description": "Store official branding name",
+          "maxLength": 100
+        },
+        "street": {
+          "type": "string",
+          "description": "Store physical street address",
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "description": "Store city and state",
+          "maxLength": 100
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Store postal or PIN code",
+          "maxLength": 20
+        },
+        "primaryEmail": {
+          "type": "string",
+          "description": "Primary store contact email / Gmail",
+          "maxLength": 256
+        },
+        "secondaryEmail": {
+          "type": "string",
+          "description": "Secondary or support email address",
+          "maxLength": 256
+        },
+        "primaryPhone": {
+          "type": "string",
+          "description": "Primary store contact telephone number",
+          "maxLength": 30
+        },
+        "hotline": {
+          "type": "string",
+          "description": "Toll-free or support hotline number",
+          "maxLength": 30
+        },
+        "whatsappNumber": {
+          "type": "string",
+          "description": "Official WhatsApp ordering phone number",
+          "maxLength": 30
+        },
+        "workingHours": {
+          "type": "string",
+          "description": "Store operating hours schedule",
+          "maxLength": 150
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when settings were last modified",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "storeName", "primaryEmail", "primaryPhone"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique order identifier",
+          "maxLength": 64
+        },
+        "userId": {
+          "type": "string",
+          "description": "User identifier who placed the order",
+          "maxLength": 128
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 256
+        },
+        "items": {
+          "type": "array",
+          "description": "List of ordered cart items"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total order amount in USD"
+        },
+        "shippingAddress": {
+          "type": "object",
+          "description": "Delivery address snapshot for this order"
+        },
+        "status": {
+          "type": "string",
+          "description": "Order status (pending, processing, shipped, delivered)",
+          "maxLength": 30
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the order was placed",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "userId", "items", "totalAmount", "shippingAddress", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile containing personal contact and delivery details"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Curated furniture catalog items"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders history"
+    },
+    "/admin_requests/{requestId}": {
+      "schema": "AdminRequest",
+      "description": "Access applications and approval records for store administrators"
+    },
+    "/settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Global store contact information, addresses, and telephone numbers"
+    }
+  }
+}

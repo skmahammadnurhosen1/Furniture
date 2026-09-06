@@ -8,6 +8,7 @@ interface WishlistDrawerProps {
   wishlist: Product[];
   onAddToCart: (product: Product) => void;
   onRemoveFromWishlist: (productId: string) => void;
+  onSelectProduct?: (product: Product) => void;
 }
 
 export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
@@ -16,6 +17,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
   wishlist,
   onAddToCart,
   onRemoveFromWishlist,
+  onSelectProduct,
 }) => {
   if (!isOpen) return null;
 
@@ -64,10 +66,24 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                     src={product.image}
                     alt={product.name}
                     referrerPolicy="no-referrer"
-                    className="w-20 h-20 rounded-lg object-cover bg-stone-100 shrink-0"
+                    onClick={() => {
+                      if (onSelectProduct) {
+                        onSelectProduct(product);
+                        onClose();
+                      }
+                    }}
+                    className="w-20 h-20 rounded-lg object-cover bg-stone-100 shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-stone-900 truncate">
+                    <h4
+                      onClick={() => {
+                        if (onSelectProduct) {
+                          onSelectProduct(product);
+                          onClose();
+                        }
+                      }}
+                      className="text-sm font-bold text-stone-900 truncate hover:text-[#C08251] cursor-pointer transition-colors"
+                    >
                       {product.name}
                     </h4>
                     <p className="text-xs text-stone-500">{product.category}</p>
